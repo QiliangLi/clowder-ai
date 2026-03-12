@@ -47,15 +47,15 @@ Most frameworks help you *call* agents. Clowder helps them *work together*.
 
 ## Supported Agents
 
-Clowder is model-agnostic. Currently supported agent CLIs:
+Clowder is model-agnostic. Each agent CLI plugs in via a unified output adapter:
 
-| Agent CLI | Model Family | Integration | Status |
-|-----------|-------------|-------------|--------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Claude (Opus / Sonnet / Haiku) | Native (Agent SDK) | Shipped |
-| [Codex CLI](https://github.com/openai/codex) | GPT / Codex | MCP Callback Bridge | Shipped |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Gemini | MCP Callback Bridge | Shipped |
-| [Antigravity](https://github.com/nolanzandi/antigravity-cli) | Multi-model | CLI subprocess | Shipped |
-| [opencode](https://github.com/sst/opencode) | Multi-model | CLI subprocess | In Progress |
+| Agent CLI | Model Family | Output Format | MCP | Status |
+|-----------|-------------|---------------|-----|--------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Claude (Opus / Sonnet / Haiku) | stream-json | Yes | Shipped |
+| [Codex CLI](https://github.com/openai/codex) | GPT / Codex | json | Yes | Shipped |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Gemini | stream-json | Yes | Shipped |
+| [Antigravity](https://github.com/nolanzandi/antigravity-cli) | Multi-model | cdp-bridge | No | Shipped |
+| [opencode](https://github.com/sst/opencode) | Multi-model | ndjson | Yes | In Progress |
 
 > Clowder doesn't replace your agent CLI — it's the layer *above* it that makes agents work as a team.
 
@@ -260,13 +260,13 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 Clowder 不绑定模型。当前支持的 Agent CLI：
 
-| Agent CLI | 模型家族 | 接入方式 | 状态 |
-|-----------|---------|---------|------|
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Claude (Opus / Sonnet / Haiku) | 原生（Agent SDK） | 已发布 |
-| [Codex CLI](https://github.com/openai/codex) | GPT / Codex | MCP 回调桥接 | 已发布 |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Gemini | MCP 回调桥接 | 已发布 |
-| [Antigravity](https://github.com/nolanzandi/antigravity-cli) | 多模型 | CLI 子进程 | 已发布 |
-| [opencode](https://github.com/sst/opencode) | 多模型 | CLI 子进程 | 进行中 |
+| Agent CLI | 模型家族 | 输出格式 | MCP | 状态 |
+|-----------|---------|---------|-----|------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Claude (Opus / Sonnet / Haiku) | stream-json | 是 | 已发布 |
+| [Codex CLI](https://github.com/openai/codex) | GPT / Codex | json | 是 | 已发布 |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | Gemini | stream-json | 是 | 已发布 |
+| [Antigravity](https://github.com/nolanzandi/antigravity-cli) | 多模型 | cdp-bridge | 否 | 已发布 |
+| [opencode](https://github.com/sst/opencode) | 多模型 | ndjson | 是 | 进行中 |
 
 > Clowder 不替代你的 Agent CLI — 它是 CLI *之上*的那一层，让 agent 们作为团队协作。
 
