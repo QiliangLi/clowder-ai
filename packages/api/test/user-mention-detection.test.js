@@ -79,7 +79,7 @@ describe('detectUserMention', () => {
   // F067 owner-config: configured mention patterns
   it('detects configured owner @owner at line start', () => {
     assert.equal(detectUserMention('@owner 请看'), true);
-    assert.equal(detectUserMention('@Landy 请看'), true);
+    assert.equal(detectUserMention('@owner 请看'), true);
   });
 
   it('detects configured owner @owner at line start', () => {

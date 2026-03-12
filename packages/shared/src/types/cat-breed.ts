@@ -179,7 +179,7 @@ export interface CatCafeConfigV1 {
  * F067: Owner (owner) configuration — configurable identity for @ mention routing.
  */
 export interface OwnerConfig {
-  /** Primary display name (e.g. "Landy") */
+  /** Primary display name (e.g. "Owner") */
   readonly name: string;
   /** Alternative names cats may use (e.g. ["A.B.", "Owner"]) */
   readonly aliases: readonly string[];

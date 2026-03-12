@@ -57,7 +57,7 @@ BEFORE 发 review 请求:
 
 1. 确认 quality-gate 已通过（拿到本轮 gate report）
 2. 确认测试全绿（附这次真实运行的输出）
-3. 找到原始 Discussion 文档路径 + 摘录 ≤5 行team lead原话
+3. 找到原始 Discussion 文档路径 + 摘录 ≤5 行team experience
 4. 检查 worktree 工具落点（git status 干净）
 5. 匹配 reviewer（跨 family 优先）
 6. 用模板写 review 请求 → 存档 mailbox
@@ -69,7 +69,7 @@ BEFORE 发 review 请求:
 **使用 `refs/review-request-template.md` 模板**（单一真相源，不在此重复）。
 
 关键字段提醒：
-- **Original Requirements**: 必填，≤5 行team lead原话 + 来源文档路径，并明确请 reviewer 对照判断
+- **Original Requirements**: 必填，≤5 行team experience + 来源文档路径，并明确请 reviewer 对照判断
 - **Open Questions**: 标注 review 重点，帮 reviewer 快速定位
 - **自检证据**: 附 quality-gate report 摘要 + 测试命令输出
 
@@ -97,7 +97,7 @@ BEFORE 发 review 请求:
 
 请附上：
 - team lead Discussion/Interview 文档路径
-- ≤5 行team lead原话摘录
+- ≤5 行team experience摘录
 
 Reviewer 不只审代码质量，还要判断"这是team lead要的吗？"
 没有原始需求 = Reviewer 无法做愿景验证 = 有权拒绝审查。

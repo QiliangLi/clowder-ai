@@ -52,6 +52,7 @@
     "check:features": "node scripts/check-feature-truth.mjs",
     "audit:feature-docs": "node scripts/audit-feature-doc-template.mjs",
     "check:skills": "bash scripts/check-skills-mount.sh",
+    "sync:skills": "bash scripts/sync-skills.sh",
     "rescue:claude:thinking": "node ./scripts/rescue-claude-thinking-signature.mjs",
     "proxy:anthropic": "node ./scripts/anthropic-proxy.mjs",
     "clean": "pnpm -r run clean && rm -rf node_modules"

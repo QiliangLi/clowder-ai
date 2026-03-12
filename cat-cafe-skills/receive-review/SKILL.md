@@ -28,7 +28,7 @@ triggers:
 | **代码级** | bug / edge case / 性能 / 命名 | Red→Green 修复流程 |
 | **愿景级** | "这不是team lead要的" / "缺了多项目管理" / "UI 不可用" | STOP → 回读原始需求 → 升级team lead |
 
-> **愿景级反馈不能用代码 patch 修补设计问题。** 先对照team lead原话验证 reviewer 说得对吗；如确实偏离，升级team lead确认偏差范围，再重新设计。
+> **愿景级反馈不能用代码 patch 修补设计问题。** 先对照team experience验证 reviewer 说得对吗；如确实偏离，升级team lead确认偏差范围，再重新设计。
 
 ### 禁止的响应（表演性同意）
 

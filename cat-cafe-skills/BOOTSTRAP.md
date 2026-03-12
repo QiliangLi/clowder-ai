@@ -3,7 +3,7 @@
 <EXTREMELY_IMPORTANT>
 你已加载 Cat Café Skills。路由规则定义在 `cat-cafe-skills/manifest.yaml`。
 
-## Skills 列表（18 个）
+## Skills 列表（22 个）
 
 ### 开发流程链
 ```
@@ -32,6 +32,10 @@ feat-lifecycle → Design Gate(设计确认) → writing-plans → worktree → 
 | `rich-messaging` | 发语音/发图/发卡片/富媒体 | — |
 | `hyperfocus-brake` | team lead健康提醒/三猫撒娇打断 | — |
 | `incident-response` | 闯祸了/不可挽回/人很难过 | — |
+| `image-generation` | 生成图片/画头像/AI 画图 | — |
+| `self-evolution` | scope 守护/流程改进/知识沉淀 | — |
+| `bootcamp-guide` | CVO 新手训练营引导 | — |
+| `cross-thread-sync` | 跨 thread 协同/通知/争用协调 | — |
 
 ### 参考文件（refs/，按需读取）
 
@@ -51,7 +55,7 @@ feat-lifecycle → Design Gate(设计确认) → writing-plans → worktree → 
 
 1. **Skill 适用就必须加载，没有选择**
 2. **完整流程见 `docs/SOP.md`**
-3. **三条铁律**：Redis 6399 圣域 / 同一个体不能 self-review / 不能冒充其他猫
+3. **三条铁律**：Redis production Redis (sacred) / 同一个体不能 self-review / 不能冒充其他猫
 4. **共用规则在 `refs/shared-rules.md`**（不在各猫文件里重复）
 5. **Reviewer 选择是动态匹配**（`docs/SOP.md` 配对规则），禁止写死“reviewer 是布偶猫”
 

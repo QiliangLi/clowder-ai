@@ -62,7 +62,7 @@ argument-hint: "[阶段: kickoff|discussion|completion] [F0xx 或主题]"
 - **开放讨论**：多猫协作。结构：背景 + 我的分析（仅供参考，**先自己想再看**）+ 开放问题（按角色分组）+ 我的倾向（透明推理链）。明确标"这是讨论不是任务"，保护观点独立性。
 
 **讨论结束必须做**：
-1. 落盘到 `docs/discussions/YYYY-MM-DD-{topic}/README.md`（含team lead原话、决策过程、优先级排序）
+1. 落盘到 `docs/discussions/YYYY-MM-DD-{topic}/README.md`（含team experience、决策过程、优先级排序）
 2. BACKLOG.md 该 Feature 行 ref 讨论文档链接
 3. Commit：`docs: {topic} discussion + backlog update [{猫猫签名}]`
 

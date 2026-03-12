@@ -38,7 +38,7 @@ triggers:
 BEFORE 声称完成 / 提 review:
 
 Step 0: VISION CHECK（愿景核对）
-  ① 找原始 Discussion/Interview 文档（team lead原话在里面）
+  ① 找原始 Discussion/Interview 文档（team experience在里面）
   ② 读核心痛点："我要..."、"我不想..."
   ③ 问自己：team lead坐在 Hub 前用这个功能，体验是什么样的？
   ④ AC 是否完整覆盖了team lead的原始需求？
@@ -54,7 +54,7 @@ Step 0.5: DELIVERY COMPLETENESS CHECK
 
 Step 1: FIND — 找 spec/plan 文档
   - docs/plans/{date}-{topic}.md 或 docs/phases/{name}.md
-  - 同时找 Discussion/Interview（team lead原话所在）
+  - 同时找 Discussion/Interview（team experience所在）
 
 Step 2: CREATE — 建检查清单
   - 列出每一个 AC / 功能点 / 边界条件

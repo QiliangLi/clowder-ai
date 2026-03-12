@@ -637,8 +637,8 @@ describe('SystemPromptBuilder', () => {
       '../dist/domains/cats/services/context/SystemPromptBuilder.js'
     );
     const identity = buildStaticIdentity('opus');
-    // Owner config has name: "Landy", mentionPatterns: ["@owner", "@owner", "@owner"]
-    assert.ok(identity.includes('Landy'), 'Should include owner name from config');
+    // Owner config has name: "Owner", mentionPatterns: ["@owner", "@owner", "@owner"]
+    assert.ok(identity.includes('Owner'), 'Should include owner name from config');
     assert.ok(identity.includes('@owner'), 'Should include @owner mention handle');
     assert.ok(identity.includes('@owner'), 'Should include @owner mention handle');
     assert.ok(identity.includes('行首'), 'Should teach line-start rule for owner mentions');
