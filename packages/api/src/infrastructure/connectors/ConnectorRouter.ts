@@ -15,7 +15,7 @@
  */
 
 import type { CatId, ConnectorSource, MessageContent } from '@cat-cafe/shared';
-import { catRegistry, getConnectorDefinition } from '@cat-cafe/shared';
+import { catRegistry, createCatId, getConnectorDefinition } from '@cat-cafe/shared';
 import type { FastifyBaseLogger } from 'fastify';
 import { findMonorepoRoot } from '../../utils/monorepo-root.js';
 import type { ConnectorCommandLayer } from './ConnectorCommandLayer.js';
@@ -299,6 +299,44 @@ export class ConnectorRouter {
           return { kind: 'routed', threadId: fwdThreadId, messageId: fwdStored.id };
         }
 
+        // /ask: forward message content to current binding's thread with explicit target cat
+        if (cmdResult.kind === 'ask' && cmdResult.forwardContent && cmdResult.targetCatId) {
+          const fwdText = cmdResult.forwardContent;
+          // Convert string to CatId
+          const targetCatId: CatId = createCatId(cmdResult.targetCatId);
+          // Use current binding thread or hub thread
+          const fwdThreadId = cmdResult.contextThreadId ?? hubThreadId;
+          if (!fwdThreadId) {
+            log.warn({ connectorId }, '[ConnectorRouter] /ask: no thread to forward to');
+            return { kind: 'skipped', reason: 'ask_no_thread' };
+          }
+          const def2 = getConnectorDefinition(connectorId);
+          const fwdSource: ConnectorSource = {
+            connector: connectorId,
+            label: def2?.displayName ?? connectorId,
+            icon: def2?.icon ?? 'message',
+          };
+          const fwdTimestamp = Date.now();
+          const fwdStored = await messageStore.append({
+            threadId: fwdThreadId,
+            userId: this.opts.defaultUserId,
+            catId: null,
+            content: fwdText,
+            source: fwdSource,
+            mentions: [targetCatId],
+            timestamp: fwdTimestamp,
+          });
+          emitConnectorMessage(socketManager, fwdThreadId, {
+            id: fwdStored.id,
+            content: fwdText,
+            source: fwdSource,
+            timestamp: fwdTimestamp,
+          });
+          invokeTrigger.trigger(fwdThreadId, targetCatId, this.opts.defaultUserId, fwdText, fwdStored.id);
+          log.info({ connectorId, threadId: fwdThreadId, targetCatId }, '[ConnectorRouter] /ask message forwarded');
+          return { kind: 'routed', threadId: fwdThreadId, messageId: fwdStored.id };
+        }
+
         const result: RouteResult = { kind: 'command' };
         if (hubThreadId) (result as { threadId?: string }).threadId = hubThreadId;
         if (stored?.responseId) (result as { messageId?: string }).messageId = stored.responseId;
@@ -351,7 +389,21 @@ export class ConnectorRouter {
     const mentionPatterns = this.getMentionPatterns();
     const mentionResult = parseMentions(resolvedText, mentionPatterns, this.opts.defaultCatId);
     let targetCatId = mentionResult.targetCatId;
-    if (!mentionResult.matched && this.opts.threadStore.getParticipantsWithActivity) {
+
+    // If no @mention, check preferredCats first (P1: @-free routing)
+    let preferredCatsApplied = false;
+    if (!mentionResult.matched && this.opts.threadStore.get) {
+      const thread = await this.opts.threadStore.get(binding.threadId);
+      const preferredCats = (thread as { preferredCats?: CatId[] })?.preferredCats;
+      if (preferredCats && preferredCats.length > 0) {
+        // Use first preferred cat
+        targetCatId = preferredCats[0];
+        preferredCatsApplied = true;
+      }
+    }
+
+    // Fallback: last-active cat in thread (only if no mention AND preferredCats not set)
+    if (!mentionResult.matched && !preferredCatsApplied && this.opts.threadStore.getParticipantsWithActivity) {
       const participants = await this.opts.threadStore.getParticipantsWithActivity(binding.threadId);
       const lastActive = participants
         .filter((p) => p.messageCount > 0)

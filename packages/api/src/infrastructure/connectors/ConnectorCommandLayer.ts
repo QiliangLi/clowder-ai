@@ -28,6 +28,8 @@ export interface CommandResult {
     | 'commands'
     | 'cats'
     | 'status'
+    | 'focus'
+    | 'ask'
     | 'not-command';
   readonly response?: string;
   readonly newActiveThreadId?: string;
@@ -35,6 +37,8 @@ export interface CommandResult {
   readonly contextThreadId?: string;
   /** Message content to forward to target thread after switching (used by /thread) */
   readonly forwardContent?: string;
+  /** For /ask: the catId to route this message to */
+  readonly targetCatId?: string;
 }
 
 interface ThreadEntry {
@@ -56,6 +60,8 @@ export interface ConnectorCommandLayerDeps {
       | Promise<{ id: string; title?: string | null; createdAt?: number } | null>;
     /** List threads owned by userId (sorted by lastActiveAt desc). Phase C: cross-platform thread view */
     list(userId: string): ThreadEntry[] | Promise<ThreadEntry[]>;
+    /** Update preferredCats for a thread */
+    updatePreferredCats?(threadId: string, catIds: string[]): void | Promise<void>;
   };
   /** Phase D: optional backlog store for feat-number matching in /use */
   readonly backlogStore?: {
@@ -136,6 +142,10 @@ export class ConnectorCommandLayer {
         return this.handleAllowGroup(connectorId, externalChatId, senderId, cmdArgs);
       case '/deny-group':
         return this.handleDenyGroup(connectorId, externalChatId, senderId, cmdArgs);
+      case '/focus':
+        return this.handleFocus(connectorId, externalChatId, cmdArgs);
+      case '/ask':
+        return this.handleAsk(connectorId, externalChatId, cmdArgs);
       default: // F142-B: unrecognized commands flow to cat (AC-B4)
         return { kind: 'not-command' };
     }
@@ -347,5 +357,153 @@ export class ConnectorCommandLayer {
         ? `🚫 群 ${targetChatId.slice(-8)} 已从白名单移除`
         : `⚠️ 群 ${targetChatId.slice(-8)} 不在白名单中`,
     };
+  }
+
+  // --- Phase F: focus/ask commands for @-free routing ---
+
+  private async handleFocus(
+    connectorId: string,
+    externalChatId: string,
+    catArg?: string,
+  ): Promise<CommandResult> {
+    const binding = await this.deps.bindingStore.getByExternal(connectorId, externalChatId);
+    if (!binding) {
+      return {
+        kind: 'focus',
+        response: '⚠️ 当前没有绑定 thread，请先用 /new 创建或 /use 切换。',
+      };
+    }
+
+    if (!catArg) {
+      const thread = await this.deps.threadStore.get(binding.threadId);
+      const preferredCats = (thread as { preferredCats?: string[] })?.preferredCats;
+      if (preferredCats && preferredCats.length > 0) {
+        const roster = this.deps.catRoster ?? {};
+        const names = preferredCats.map((id) => roster[id]?.displayName ?? id);
+        return {
+          kind: 'focus',
+          contextThreadId: binding.threadId,
+          response: `🎯 当前首选猫：${names.join('、')}`,
+        };
+      }
+      return {
+        kind: 'focus',
+        contextThreadId: binding.threadId,
+        response: '🎯 当前没有设置首选猫。\n用法: /focus <猫名>（如: /focus opus）',
+      };
+    }
+
+    // Normalize catArg: handle common aliases
+    const catId = this.normalizeCatId(catArg);
+    if (!catId) {
+      return {
+        kind: 'focus',
+        response: `❌ 找不到猫 "${catArg}"。\n用 /cats 查看可用猫猫。`,
+      };
+    }
+
+    // Update preferredCats
+    if (this.deps.threadStore.updatePreferredCats) {
+      await this.deps.threadStore.updatePreferredCats(binding.threadId, [catId]);
+    }
+
+    const roster = this.deps.catRoster ?? {};
+    const displayName = roster[catId]?.displayName ?? catId;
+    return {
+      kind: 'focus',
+      contextThreadId: binding.threadId,
+      response: `🎯 已设置首选猫：${displayName}\n\n后续消息会默认发给它。用 /focus 不带参数可查看，用 /new 切换到新 thread 清除。`,
+    };
+  }
+
+  private async handleAsk(
+    connectorId: string,
+    externalChatId: string,
+    args?: string,
+  ): Promise<CommandResult> {
+    if (!args) {
+      return {
+        kind: 'ask',
+        response: '❌ 用法: /ask <猫名> <消息>\n示例: /ask opus 帮我 review 这段代码',
+      };
+    }
+
+    // Parse cat name and message
+    const parts = args.trim().split(/\s+/);
+    if (parts.length < 2) {
+      return {
+        kind: 'ask',
+        response: '❌ 用法: /ask <猫名> <消息>\n示例: /ask opus 帮我 review 这段代码',
+      };
+    }
+
+    const catArg = parts[0];
+    const message = parts.slice(1).join(' ');
+
+    // Normalize catArg
+    const catId = this.normalizeCatId(catArg);
+    if (!catId) {
+      return {
+        kind: 'ask',
+        response: `❌ 找不到猫 "${catArg}"。\n用 /cats 查看可用猫猫。`,
+      };
+    }
+
+    // Get binding for contextThreadId
+    const binding = await this.deps.bindingStore.getByExternal(connectorId, externalChatId);
+    if (!binding) {
+      const roster = this.deps.catRoster ?? {};
+      const displayName = roster[catId]?.displayName ?? catId;
+      return {
+        kind: 'ask',
+        response: `⚠️ 当前没有绑定 thread，无法发送消息给 ${displayName}。\n请先用 /new 创建或 /use 切换到已有 thread。`,
+      };
+    }
+
+    const roster = this.deps.catRoster ?? {};
+    const displayName = roster[catId]?.displayName ?? catId;
+
+    return {
+      kind: 'ask',
+      targetCatId: catId,
+      contextThreadId: binding.threadId,
+      response: `📨 → ${displayName}（单次定向，不改变默认猫）`,
+      forwardContent: message,
+    };
+  }
+
+  /** Normalize common cat name aliases to canonical catId */
+  private normalizeCatId(input: string): string | null {
+    const normalized = input.toLowerCase().trim();
+    const roster = this.deps.catRoster ?? {};
+
+    // Direct match
+    if (roster[normalized]) return normalized;
+
+    // Alias mapping
+    const aliasMap: Record<string, string> = {
+      '宪宪': 'opus',
+      '布偶猫': 'opus',
+      'opus-46': 'opus',
+      'opus46': 'opus',
+      '砚砚': 'codex',
+      '缅因猫': 'codex',
+      '烁烁': 'gemini',
+      '暹罗猫': 'gemini',
+      'sonnet': 'sonnet',
+      'spark': 'spark',
+    };
+
+    const mapped = aliasMap[normalized];
+    if (mapped && roster[mapped]) return mapped;
+
+    // Try partial match (case-insensitive)
+    for (const [id, entry] of Object.entries(roster)) {
+      if (id.toLowerCase().startsWith(normalized) || entry.displayName?.toLowerCase().includes(normalized)) {
+        return id;
+      }
+    }
+
+    return null;
   }
 }

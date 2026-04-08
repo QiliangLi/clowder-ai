@@ -53,6 +53,8 @@ const FALLBACK_COMMANDS = [
   { cmd: '/use <F号|序号|关键词>', desc: '切换到指定 thread' },
   { cmd: '/thread <id> <消息>', desc: '切换并发送消息' },
   { cmd: '/unbind', desc: '解除当前绑定' },
+  { cmd: '/focus <猫名>', desc: '设置当前 thread 的首选猫' },
+  { cmd: '/ask <猫名> <消息>', desc: '单次定向：让指定猫回复这条消息' },
 ];
 
 export function buildCommandsList(registry?: CommandRegistry): CommandResult {
