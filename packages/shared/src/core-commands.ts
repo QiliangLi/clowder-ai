@@ -246,4 +246,20 @@ export const CORE_COMMANDS: readonly SlashCommandDefinition[] = [
     surface: 'connector',
     source: 'core',
   },
+  {
+    name: '/focus',
+    usage: '/focus <猫名>',
+    description: '设置当前 thread 的首选猫',
+    category: 'connector',
+    surface: 'connector',
+    source: 'core',
+  },
+  {
+    name: '/ask',
+    usage: '/ask <猫名> <消息>',
+    description: '单次定向：让指定猫回复这条消息',
+    category: 'connector',
+    surface: 'connector',
+    source: 'core',
+  },
 ] as const;

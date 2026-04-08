@@ -396,9 +396,13 @@ export class ConnectorRouter {
       const thread = await this.opts.threadStore.get(binding.threadId);
       const preferredCats = (thread as { preferredCats?: CatId[] })?.preferredCats;
       if (preferredCats && preferredCats.length > 0) {
-        // Use first preferred cat
-        targetCatId = preferredCats[0];
-        preferredCatsApplied = true;
+        const preferredCatId = preferredCats[0];
+        // Validate preferred cat exists in registry (skip stale/disabled cats)
+        if (catRegistry.tryGet(preferredCatId)) {
+          targetCatId = preferredCatId;
+          preferredCatsApplied = true;
+        }
+        // If preferred cat doesn't exist, fall through to last-active cat
       }
     }
 

@@ -402,10 +402,16 @@ export class ConnectorCommandLayer {
       };
     }
 
-    // Update preferredCats
-    if (this.deps.threadStore.updatePreferredCats) {
-      await this.deps.threadStore.updatePreferredCats(binding.threadId, [catId]);
+    // Update preferredCats - fail if persistence unavailable
+    if (!this.deps.threadStore.updatePreferredCats) {
+      const roster = this.deps.catRoster ?? {};
+      const displayName = roster[catId]?.displayName ?? catId;
+      return {
+        kind: 'focus',
+        response: `⚠️ 无法设置首选猫：${displayName}。\n\n当前环境不支持持久化存储，/focus 功能需要 threadStore.updatePreferredCats 方法。`,
+      };
     }
+    await this.deps.threadStore.updatePreferredCats(binding.threadId, [catId]);
 
     const roster = this.deps.catRoster ?? {};
     const displayName = roster[catId]?.displayName ?? catId;
